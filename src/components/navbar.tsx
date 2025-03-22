@@ -29,8 +29,8 @@ export default function Navbar() {
   const { data: session } = useSession();
 
   const navigation = [
-    { name: 'Home', href: '/' },
-    { name: 'Mission History', href: '/mission-history' },
+    { name: 'Current Mission', href: '/' },
+    { name: 'Completed Missions', href: '/mission-history' },
   ].map((route: any) => ({
     ...route,
     current: router.pathname === route.href,
