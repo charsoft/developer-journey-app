@@ -55,12 +55,15 @@ export default async function handler(
         environment: process.env.NODE_ENV
       });
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Firestore diagnostic test failed:", error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    
     res.status(500).json({ 
       success: false, 
-      error: error.message, 
-      stack: error.stack,
+      error: errorMessage,
+      stack: errorStack,
       projectId: process.env.PROJECT_ID,
       environment: process.env.NODE_ENV
     });
