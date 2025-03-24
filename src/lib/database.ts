@@ -100,4 +100,24 @@ export class Database {
       return false;
     }
   }
+
+  // Adding a new method to test connection with detailed logging
+  async testConnection() {
+    console.log("Testing Firestore connection...");
+    try {
+      // Try a basic Firestore operation
+      const testDoc = this.db.collection('_connection_test').doc('test');
+      await testDoc.set({ timestamp: new Date().toISOString() });
+      console.log("Successfully wrote to Firestore!");
+      
+      // Try reading it back
+      const doc = await testDoc.get();
+      console.log("Successfully read from Firestore:", doc.data());
+      
+      return true;
+    } catch (error) {
+      console.error("Firestore connection test failed:", error);
+      return false;
+    }
+  }
 }
