@@ -115,8 +115,8 @@ export class Database {
       console.log("Successfully read from Firestore:", doc.data());
       
       return true;
-    } catch (error) {
-      console.error("Firestore connection test failed:", error);
+    } catch (error: unknown) {
+      console.error("Firestore connection test failed:", error instanceof Error ? error.message : error);
       return false;
     }
   }
