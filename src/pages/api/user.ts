@@ -22,18 +22,46 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<User>
 ) {
+  console.log("API Request received:", {
+    method: req.method,
+    body: req.body,
+    headers: req.headers
+  });
+
   const fs = new Database();
   const session = await getSession({ req });
+  console.log("Session info:", { 
+    hasSession: !!session,
+    user: session?.user 
+  });
+
   const username = session?.user?.name || '';
   if (!username) {
+    console.log("No username found in session");
     return res.status(200).send({ username, completedMissions: [] });
   }
 
   if (req.method === 'POST') {
-    const missionId = req.body.id;
-    await fs.addCompletedMission({ username, missionId })
+    console.log("Processing POST request", {
+      username,
+      missionId: req.body.id
+    });
+    try {
+      const missionId = req.body.id;
+      await fs.addCompletedMission({ username, missionId });
+      console.log("Successfully added mission", { username, missionId });
+    } catch (error) {
+      console.error("Error adding mission:", error);
+      return res.status(500).json({ username, completedMissions: [], error: 'Failed to add mission' } as any);
+    }
   }
 
-  const user = await fs.getUser({ username });
-  res.status(200).json(user)
+  try {
+    const user = await fs.getUser({ username });
+    console.log("Retrieved user data:", user);
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Error getting user:", error);
+    res.status(500).json({ username, completedMissions: [], error: 'Failed to get user' } as any);
+  }
 }

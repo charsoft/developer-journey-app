@@ -43,8 +43,8 @@ export const apiSlice = createApi({
       query: ({mission}: {mission: Mission}) => ({
         url: '/user',
         method: 'POST',
-        // Include the entire post object as the body of the request
-        body: mission,
+        // Include just the mission ID in the body
+        body: { id: mission.id },
       }),
       invalidatesTags: ['User']
     }),
