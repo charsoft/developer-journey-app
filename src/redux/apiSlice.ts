@@ -56,7 +56,7 @@ export const apiSlice = createApi({
       // so that it will be refetched
       invalidatesTags: ['User'],
       // Add an onQueryStarted callback to log the request
-      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+      async onQueryStarted(arg, { queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
           console.log("Mission completion request successful:", { 
