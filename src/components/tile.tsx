@@ -50,16 +50,32 @@ export default function Component({ x, y }: GridPosition) {
 
   const completeMission = async () => {
     if (allItemsCollected && user) {
+      console.log("Starting mission completion:", { 
+        mission, 
+        user,
+        allItemsCollected 
+      });
       dispatch(setIsSavingMission(true));
       return addCompletedMission({ mission }).unwrap()
         .then(() => {
+          console.log("Mission completion successful:", { missionId: mission.id });
           dispatch(startMission({ nextMission: true }))
         })
         .catch((error: Error) => {
-          console.error('addCompletedMission request did not work.', { error })
+          console.error('Mission completion failed:', { 
+            error,
+            mission,
+            errorMessage: error.message 
+          });
         }).finally(() => {
           dispatch(setIsSavingMission(false));
         });
+    } else {
+      console.log("Cannot complete mission:", { 
+        allItemsCollected, 
+        hasUser: !!user,
+        mission 
+      });
     }
   }
 
