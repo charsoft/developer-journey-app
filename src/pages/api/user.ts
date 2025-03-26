@@ -25,14 +25,16 @@ export default async function handler(
   console.log("API Request received:", {
     method: req.method,
     body: req.body,
-    headers: req.headers
+    headers: req.headers,
+    url: req.url
   });
 
   const fs = new Database();
   const session = await getSession({ req });
   console.log("Session info:", { 
     hasSession: !!session,
-    user: session?.user 
+    user: session?.user,
+    expires: session?.expires
   });
 
   const username = session?.user?.name || '';
@@ -44,7 +46,8 @@ export default async function handler(
   if (req.method === 'POST') {
     console.log("Processing POST request", {
       username,
-      missionId: req.body.id
+      missionId: req.body.id,
+      body: req.body
     });
     try {
       const missionId = req.body.id;
@@ -57,6 +60,7 @@ export default async function handler(
   }
 
   try {
+    console.log("Attempting to get user data for:", username);
     const user = await fs.getUser({ username });
     console.log("Retrieved user data:", user);
     res.status(200).json(user);
