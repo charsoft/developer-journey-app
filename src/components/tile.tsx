@@ -57,8 +57,7 @@ export default function Component({ x, y }: GridPosition) {
       missionTitle: mission.title,
       userId: user.id,
       hasAllItems: allItemsCollected,
-      itemsCollected: user.itemsCollected,
-      requiredItems: mission.requiredItems
+      itemsCollected: user.itemsCollected
     });
 
     try {

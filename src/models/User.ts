@@ -13,7 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export class User {
-  username!: string;
-  completedMissions!: string[];
+export interface User {
+  id: string;
+  username: string;
+  completedMissions: string[];
+  itemsCollected: string[];
+  currentMission?: string;
+  position?: {
+    x: number;
+    y: number;
+  };
 }
