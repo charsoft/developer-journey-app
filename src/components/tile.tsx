@@ -20,6 +20,7 @@ import { GridPosition } from 'src/models/GridPosition';
 import { collectItem, moveDown, moveLeft, moveRight, moveUp, setIsSavingMission, startMission } from 'src/redux/gameSlice';
 import { useAddCompletedMissionMutation, useGetUserQuery } from 'src/redux/apiSlice'
 import { UserCircleIcon } from '@heroicons/react/24/outline'
+import { toast } from 'react-hot-toast'
 
 
 export default function Component({ x, y }: GridPosition) {
@@ -49,35 +50,39 @@ export default function Component({ x, y }: GridPosition) {
 
 
   const completeMission = async () => {
-    if (allItemsCollected && user) {
-      console.log("Starting mission completion:", { 
-        mission, 
-        user,
-        allItemsCollected 
-      });
+    if (!user || !mission) return;
+    
+    console.log("Starting mission completion process:", {
+      missionId: mission.id,
+      missionTitle: mission.title,
+      userId: user.id,
+      hasAllItems: allItemsCollected,
+      itemsCollected: user.itemsCollected,
+      requiredItems: mission.requiredItems
+    });
+
+    try {
       dispatch(setIsSavingMission(true));
-      return addCompletedMission({ mission }).unwrap()
-        .then(() => {
-          console.log("Mission completion successful:", { missionId: mission.id });
-          dispatch(startMission({ nextMission: true }))
-        })
-        .catch((error: Error) => {
-          console.error('Mission completion failed:', { 
-            error,
-            mission,
-            errorMessage: error.message 
-          });
-        }).finally(() => {
-          dispatch(setIsSavingMission(false));
-        });
-    } else {
-      console.log("Cannot complete mission:", { 
-        allItemsCollected, 
-        hasUser: !!user,
-        mission 
+      const result = await addCompletedMission({ mission }).unwrap();
+      console.log("Mission completion result:", result);
+      
+      // Show success message
+      toast.success('Mission completed!');
+      
+      // Start the next mission
+      dispatch(startMission({ nextMission: true }));
+    } catch (error) {
+      console.error("Mission completion failed:", {
+        error,
+        missionId: mission.id,
+        missionTitle: mission.title,
+        userId: user.id
       });
+      toast.error('Failed to complete mission');
+    } finally {
+      dispatch(setIsSavingMission(false));
     }
-  }
+  };
 
   if (isError) {
     return <div>{error.toString()}</div>

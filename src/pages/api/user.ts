@@ -44,18 +44,39 @@ export default async function handler(
   }
 
   if (req.method === 'POST') {
-    console.log("Processing POST request", {
-      username,
-      missionId: req.body.id,
-      body: req.body
-    });
     try {
-      const missionId = req.body.id;
-      await fs.addCompletedMission({ username, missionId });
-      console.log("Successfully added mission", { username, missionId });
+      console.log("Received POST request to /api/user:", {
+        body: req.body,
+        headers: req.headers
+      });
+
+      const { id: missionId } = req.body;
+      console.log("Processing mission completion for missionId:", missionId);
+
+      if (!missionId) {
+        console.error("No mission ID provided in request body");
+        return res.status(400).json({ 
+          username, 
+          completedMissions: [], 
+          error: 'Mission ID is required' 
+        } as User & { error: string });
+      }
+
+      const result = await fs.addCompletedMission({ username, missionId });
+      console.log("Mission completion result:", result);
+
+      return res.status(200).json(result);
     } catch (error) {
-      console.error("Error adding mission:", error);
-      return res.status(500).json({ username, completedMissions: [], error: 'Failed to add mission' } as any);
+      console.error("Error in POST /api/user:", {
+        error,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      return res.status(500).json({ 
+        username, 
+        completedMissions: [], 
+        error: 'Failed to complete mission' 
+      } as User & { error: string });
     }
   }
 
