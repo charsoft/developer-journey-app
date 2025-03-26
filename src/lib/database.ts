@@ -43,60 +43,73 @@ export class Database {
     }
   }
 
-  async setUser({ username, completedMissions }: { username: string, completedMissions?: string[] }): Promise<any> {
-    console.log("Attempting to set user:", { username, completedMissions });
-    const userDoc = this.db.collection('users').doc(username);
-
+  async setUser(userData: User): Promise<User> {
     try {
-      const result = await userDoc.set({
-        username,
-        completedMissions: completedMissions || [],
-      }, { merge: true });
-      console.log("Successfully set user:", { username, result });
-      return result;
+      console.log("Setting user data:", userData);
+      await this.db.collection('users').doc(userData.username).set(userData);
+      console.log("User data set successfully.");
+      return userData;
     } catch (error) {
       console.error("Error setting user:", error);
       throw error;
     }
   }
 
-  async getUser({ username }: { username: string }): Promise<User> {
-    console.log("Attempting to get user:", { username });
-    const userDoc = this.db.collection('users').doc(username);
-    
+  async getUser(username: string): Promise<User> {
     try {
-      const snapshot = await userDoc.get();
-      const data = snapshot.data();
-      console.log("User data retrieved:", { username, data });
+      console.log("Getting user data for:", username);
+      const userDoc = await this.db.collection('users').doc(username).get();
       
-      if (!data) {
-        console.log("No user data found, creating new user");
-        await this.setUser({ username, completedMissions: [] });
-        return { username, completedMissions: [] };
+      if (!userDoc.exists) {
+        console.log("User not found, creating new user");
+        const newUser: User = {
+          id: username, // Using username as ID for now
+          username,
+          completedMissions: [],
+          itemsCollected: [],
+          currentMission: undefined,
+          position: undefined
+        };
+        await this.db.collection('users').doc(username).set(newUser);
+        console.log("Created new user:", newUser);
+        return newUser;
       }
-      
-      return { 
-        username, 
-        completedMissions: data.completedMissions || [] 
-      };
+
+      const userData = userDoc.data() as User;
+      console.log("Retrieved user data:", userData);
+      return userData;
     } catch (error) {
       console.error("Error getting user:", error);
       throw error;
     }
   }
 
-  async addCompletedMission({ username, missionId }: { username: string, missionId: string }): Promise<any> {
-    console.log("Attempting to add completed mission:", { username, missionId });
+  async addCompletedMission(username: string, missionId: string): Promise<User> {
     try {
-      const { completedMissions } = await this.getUser({ username });
-      const updatedMissions = [...completedMissions, missionId];
-      console.log("Current missions:", completedMissions, "Updated missions:", updatedMissions);
+      console.log("Adding completed mission:", { username, missionId });
+      const userRef = this.db.collection('users').doc(username);
+      
+      const result = await this.db.runTransaction(async (transaction) => {
+        const userDoc = await transaction.get(userRef);
+        
+        if (!userDoc.exists) {
+          throw new Error('User not found');
+        }
 
-      const result = await this.setUser({
-        username,
-        completedMissions: updatedMissions,
+        const userData = userDoc.data() as User;
+        const updatedCompletedMissions = [...userData.completedMissions, missionId];
+        
+        transaction.update(userRef, {
+          completedMissions: updatedCompletedMissions
+        });
+
+        return {
+          ...userData,
+          completedMissions: updatedCompletedMissions
+        };
       });
-      console.log("Successfully added mission:", { username, missionId, result });
+
+      console.log("Successfully added completed mission:", result);
       return result;
     } catch (error) {
       console.error("Error adding completed mission:", error);

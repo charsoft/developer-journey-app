@@ -39,8 +39,36 @@ export default async function handler(
 
   const username = session?.user?.name || '';
   if (!username) {
-    console.log("No username found in session");
-    return res.status(200).send({ username, completedMissions: [] });
+    console.error("No username provided");
+    return res.status(400).json({ 
+      id: '',
+      username: '',
+      completedMissions: [],
+      itemsCollected: [],
+      error: 'Username is required' 
+    } as User & { error: string });
+  }
+
+  if (req.method === 'GET') {
+    try {
+      console.log("Getting user data for:", username);
+      const userData = await fs.getUser(username);
+      console.log("Retrieved user data:", userData);
+      return res.status(200).json(userData);
+    } catch (error) {
+      console.error("Error getting user:", {
+        error,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      return res.status(500).json({ 
+        id: username,
+        username,
+        completedMissions: [],
+        itemsCollected: [],
+        error: 'Failed to get user data' 
+      } as User & { error: string });
+    }
   }
 
   if (req.method === 'POST') {
@@ -56,13 +84,15 @@ export default async function handler(
       if (!missionId) {
         console.error("No mission ID provided in request body");
         return res.status(400).json({ 
-          username, 
-          completedMissions: [], 
+          id: username,
+          username,
+          completedMissions: [],
+          itemsCollected: [],
           error: 'Mission ID is required' 
         } as User & { error: string });
       }
 
-      const result = await fs.addCompletedMission({ username, missionId });
+      const result = await fs.addCompletedMission(username, missionId);
       console.log("Mission completion result:", result);
 
       return res.status(200).json(result);
@@ -73,20 +103,12 @@ export default async function handler(
         stack: error instanceof Error ? error.stack : undefined
       });
       return res.status(500).json({ 
-        username, 
-        completedMissions: [], 
+        id: username,
+        username,
+        completedMissions: [],
+        itemsCollected: [],
         error: 'Failed to complete mission' 
       } as User & { error: string });
     }
-  }
-
-  try {
-    console.log("Attempting to get user data for:", username);
-    const user = await fs.getUser({ username });
-    console.log("Retrieved user data:", user);
-    res.status(200).json(user);
-  } catch (error) {
-    console.error("Error getting user:", error);
-    res.status(500).json({ username, completedMissions: [], error: 'Failed to get user' } as any);
   }
 }

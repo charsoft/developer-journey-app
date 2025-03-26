@@ -30,14 +30,11 @@ export default async function handler(
     console.log(`Firestore connection check: ${isConnected ? 'successful' : 'failed'}`);
     
     if (isConnected) {
-      // Try users collection
-      await db.setUser({ 
-        username: 'diagnostic-test-user', 
-        completedMissions: ['test-mission'] 
-      });
+      // Test 3: Creating and retrieving a test user
+      await db.testConnection();
       console.log("Test user created successfully");
-      
-      const user = await db.getUser({ username: 'diagnostic-test-user' });
+
+      const user = await db.getUser('diagnostic-test-user');
       console.log("Test user retrieved:", user);
       
       res.status(200).json({ 

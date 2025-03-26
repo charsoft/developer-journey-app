@@ -20,6 +20,7 @@ import { Provider } from 'react-redux'
 import { store } from '../redux/store'
 import Head from 'next/head';
 import Navbar from 'src/components/navbar';
+import { Toaster } from 'react-hot-toast'
 
 export default function App({
   Component,
@@ -35,6 +36,7 @@ export default function App({
             <Navbar />
             <Component {...pageProps} />
           </div>
+          <Toaster position="top-center" />
         </Provider>
       </SessionProvider>
     </>
