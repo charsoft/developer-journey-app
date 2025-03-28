@@ -50,12 +50,21 @@ export default function Component({ x, y }: GridPosition) {
 
 
   const completeMission = async () => {
-    if (!user || !mission) return;
+    if (!user || !mission) {
+      console.error("Cannot complete mission:", { 
+        hasUser: !!user, 
+        hasMission: !!mission,
+        user,
+        mission 
+      });
+      return;
+    }
     
     console.log("Starting mission completion process:", {
       missionId: mission.id,
       missionTitle: mission.title,
       userId: user.id,
+      username: user.username,
       hasAllItems: allItemsCollected,
       itemsCollected: user.itemsCollected
     });
@@ -75,7 +84,8 @@ export default function Component({ x, y }: GridPosition) {
         error,
         missionId: mission.id,
         missionTitle: mission.title,
-        userId: user.id
+        userId: user.id,
+        username: user.username
       });
       toast.error('Failed to complete mission');
     } finally {
