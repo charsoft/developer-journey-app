@@ -13,32 +13,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { useSession, } from "next-auth/react"
-
-// Components
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import { useGetUserQuery } from 'src/redux/apiSlice';
+import Head from "next/head";
 import PromptPanel from "../components/prompt-panel";
 import TileBoard from "../components/tile-board";
 import GameControls from "../components/game-controls";
 import Inventory from "../components/inventory";
-import Head from "next/head";
 import SignInRecommendation from "src/components/sign-in-recommendation";
 
 export default function Home() {
-  const { status } = useSession();
+  const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
+  const { data: user, isLoading } = useGetUserQuery();
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return <div>Loading...</div>;
+  }
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    router.push('/signin');
+    return null;
+  }
+
   return (
     <>
       <Head>
         <title>Home | Developer Journey App</title>
       </Head>
       <main>
-        {status === "authenticated" ? (
-          <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
-            <PromptPanel />
-            <TileBoard />
-            <GameControls />
-            <Inventory />
-          </div>
-        ) : (<SignInRecommendation />)}
+        <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+          <PromptPanel />
+          <TileBoard />
+          <GameControls />
+          <Inventory />
+        </div>
       </main>
     </>
   )

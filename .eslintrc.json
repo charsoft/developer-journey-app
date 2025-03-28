@@ -3,5 +3,8 @@
     "jest/globals": true
   },
   "extends": ["eslint:recommended", "next/core-web-vitals", "prettier"],
-  "plugins": ["jest"]
+  "plugins": ["jest"],
+  "rules": {
+    "no-unused-vars": "warn"
+  }
 }

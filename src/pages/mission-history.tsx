@@ -13,28 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { useSession, } from "next-auth/react"
-
-// Components
-import SignInRecommendation from "../components/sign-in-recommendation";
-import MissionHistory from "src/components/mission-history";
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import { useGetUserQuery } from 'src/redux/apiSlice';
+import MissionHistory from 'src/components/mission-history';
 import Head from "next/head";
 
 export default function MissionHistoryPage() {
-  const { status } = useSession();
+  const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
+  const { data: user, isLoading } = useGetUserQuery();
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return <div>Loading...</div>;
+  }
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    router.push('/signin');
+    return null;
+  }
+
   return (
     <>
       <Head>
         <title>Mission History | Developer Journey App</title>
       </Head>
       <main>
-        {status === "authenticated" ? (
-
-          <div className="grid grid-cols-12 gap-3">
-            <MissionHistory />
-          </div>
-        ) : (<SignInRecommendation />)}
+        <div className="grid grid-cols-12 gap-3">
+          <MissionHistory />
+        </div>
       </main>
     </>
-  )
+  );
 }
