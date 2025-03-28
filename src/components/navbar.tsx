@@ -31,6 +31,7 @@ export default function Navbar() {
   const navigation = [
     { name: 'Current Mission', href: '/' },
     { name: 'Completed Missions', href: '/mission-history' },
+    { name: 'User Profile', href: '/userProfile' },
   ].map((route: any) => ({
     ...route,
     current: router.pathname === route.href,
