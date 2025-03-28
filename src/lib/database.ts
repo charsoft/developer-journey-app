@@ -108,8 +108,8 @@ export class Database {
   async testConnection(): Promise<boolean> {
     try {
       // Try a basic Firestore operation
-      const testDoc = this.db.collection('_connection_test').doc('test');
-      await testDoc.set({ timestamp: new Date().toISOString() });
+      const testDoc = this.db.collection('users').doc('test-user');
+      await testDoc.set({ username: 'diagnostic-test-user2' });
       console.log("Successfully wrote to Firestore!");
       
       // Try reading it back
