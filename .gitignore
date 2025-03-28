@@ -21,18 +21,22 @@
 
 # debug
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # local env files
 .env*.local
-.env.yaml
+.env
+
+# vercel
+.vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-/test-results/
-/playwright-report/
-/playwright/.cache/
-/playwright/.auth/
+
+# service account
+service-account.json
 
 # Local .terraform directories
 **/.terraform/*
