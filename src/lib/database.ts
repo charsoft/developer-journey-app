@@ -63,7 +63,7 @@ export class Database {
       if (!userDoc.exists) {
         console.log("User not found, creating new user");
         const newUser: User = {
-          id: username, // Using username as ID for now
+          id: username, // Using username as ID
           username,
           completedMissions: [],
           itemsCollected: [],
@@ -76,6 +76,18 @@ export class Database {
       }
 
       const userData = userDoc.data() as User;
+      // Ensure the user has an ID
+      if (!userData.id) {
+        console.log("User exists but has no ID, updating with ID");
+        const updatedUser = {
+          ...userData,
+          id: username
+        };
+        await this.db.collection('users').doc(username).set(updatedUser, { merge: true });
+        console.log("Updated user with ID:", updatedUser);
+        return updatedUser;
+      }
+
       console.log("Retrieved user data:", userData);
       return userData;
     } catch (error) {
@@ -97,6 +109,10 @@ export class Database {
         }
 
         const userData = userDoc.data() as User;
+        if (!userData.id) {
+          throw new Error('User has no ID');
+        }
+
         const updatedCompletedMissions = [...userData.completedMissions, missionId];
         
         transaction.update(userRef, {
