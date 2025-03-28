@@ -20,23 +20,24 @@ export class Database {
   private db: Firestore;
 
   constructor() {
-    if (process.env.NODE_ENV === 'development') {
-      // use the firestore emulator
-      this.db = new Firestore({
-        host: "localhost:9999",
-        projectId: "demo-test",
-        ssl: false,
-      });
-    } else {
-      // use the PROJECT_ID environment variable
-      const projectId = process.env.PROJECT_ID;
-      if (!projectId) {
-        const errMessage = "PROJECT_ID environment variable must be defined.";
-        console.error(errMessage);
-        throw new Error(errMessage);
-      }
+    const projectId = process.env.PROJECT_ID;
+    if (!projectId) {
+      const errMessage = "PROJECT_ID environment variable must be defined.";
+      console.error(errMessage);
+      throw new Error(errMessage);
+    }
+
+    // In Cloud Run, we don't need to specify credentials as it uses the service account
+    // assigned to the Cloud Run service
+    if (process.env.NODE_ENV === 'production') {
       this.db = new Firestore({
         projectId: projectId,
+      });
+    } else {
+      // Local development uses the service account JSON file
+      this.db = new Firestore({
+        projectId: projectId,
+        keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
       });
     }
   }
