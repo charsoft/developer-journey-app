@@ -17,7 +17,6 @@ import Image from 'next/image';
 import { Disclosure } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/router'
-import { signIn, signOut, useSession } from 'next-auth/react'
 import Link from 'next/link';
 
 function classNames(...classes: any) {
@@ -26,7 +25,6 @@ function classNames(...classes: any) {
 
 export default function Navbar() {
   const router = useRouter()
-  const { data: session } = useSession();
 
   const navigation = [
     { name: 'Current Mission', href: '/' },
@@ -36,6 +34,7 @@ export default function Navbar() {
     ...route,
     current: router.pathname === route.href,
   }));
+
   return (
     <Disclosure as="nav" className="bg-gray-800">
       {({ open }: { open: any }) => (
@@ -82,30 +81,13 @@ export default function Navbar() {
                 </div>
               </div>
 
-              {/* username and sign in/sign out button */}
-              {session?.user?.name ? (
-                <>
-                  <span className='block sm:hidden text-gray-300 rounded-md px-3 py-2 text-sm font-small'>
-                    {session.user.name.length < 20 ? (session.user.name) : (session.user.name.substring(0,18) + '...')}
-                  </span>
-                  <span className='hidden sm:block text-gray-300 rounded-md px-3 py-2 text-sm font-small'>
-                    {session.user.name.length < 30 ? (session.user.name) : (session.user.name.substring(0,28) + '...')}
-                  </span>
-                  <button
-                    className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
-                    onClick={() => signOut()}
-                  >
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <button
-                  className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
-                  onClick={() => signIn()}
-                >
-                  Sign in
-                </button>
-              )}
+              {/* Sign in or Register button */}
+              <Link
+                href="/signin"
+                className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'
+              >
+                Sign in or Register
+              </Link>
             </div>
           </div>
 
