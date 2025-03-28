@@ -75,7 +75,8 @@ export default async function handler(
     try {
       console.log("Received POST request to /api/user:", {
         body: req.body,
-        headers: req.headers
+        headers: req.headers,
+        session: session?.user
       });
 
       const { id: missionId } = req.body;
@@ -92,6 +93,17 @@ export default async function handler(
         } as User & { error: string });
       }
 
+      if (!username) {
+        console.error("No username found in session");
+        return res.status(401).json({ 
+          id: '',
+          username: '',
+          completedMissions: [],
+          itemsCollected: [],
+          error: 'User not authenticated' 
+        } as User & { error: string });
+      }
+
       const result = await fs.addCompletedMission(username, missionId);
       console.log("Mission completion result:", result);
 
@@ -100,7 +112,9 @@ export default async function handler(
       console.error("Error in POST /api/user:", {
         error,
         errorMessage: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
+        stack: error instanceof Error ? error.stack : undefined,
+        username,
+        missionId: req.body?.id
       });
       return res.status(500).json({ 
         id: username,

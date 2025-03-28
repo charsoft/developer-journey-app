@@ -38,26 +38,20 @@ export const apiSlice = createApi({
       },
       providesTags: ['User'],
     }),
-    addCompletedMission: builder.mutation({
-      // The URL for the request is '/api/user', this is a POST request
-      query: ({mission}: {mission: Mission}) => {
-        console.log("Sending mission completion request:", { 
-          missionId: mission.id,
-          mission
-        });
-        return {
-          url: '/user',
-          method: 'POST',
-          // Include just the mission ID in the body
-          body: { id: mission.id },
-        };
-      },
-      // When the request is successful, invalidate the User cache
-      // so that it will be refetched
+    addCompletedMission: builder.mutation<User, { mission: Mission }>({
+      query: ({ mission }) => ({
+        url: '/user',
+        method: 'POST',
+        body: { id: mission.id }
+      }),
       invalidatesTags: ['User'],
       // Add an onQueryStarted callback to log the request
       async onQueryStarted(arg, { queryFulfilled }) {
         try {
+          console.log("Sending mission completion request:", {
+            missionId: arg.mission.id,
+            missionTitle: arg.mission.title
+          });
           const { data } = await queryFulfilled;
           console.log("Mission completion request successful:", { 
             data,
