@@ -16,8 +16,8 @@
 export interface User {
   id: string;
   username: string;
-  completedMissions: string[];
-  itemsCollected: string[];
+  completedMissions?: string[];
+  itemsCollected?: string[];
   currentMission?: string;
   position?: {
     x: number;
