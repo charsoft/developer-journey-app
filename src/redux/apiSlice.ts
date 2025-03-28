@@ -38,11 +38,13 @@ export const apiSlice = createApi({
       },
       providesTags: ['User'],
     }),
-    addCompletedMission: builder.mutation<User, { mission: Mission }>({
-      query: ({ mission }) => ({
+    addCompletedMission: builder.mutation({
+      // The URL for the request is '/api/user', this is a POST request
+      query: ({mission}: {mission: Mission}) => ({
         url: '/user',
         method: 'POST',
-        body: { id: mission.id }
+        // Include the entire post object as the body of the request
+        body: mission,
       }),
       invalidatesTags: ['User'],
       // Add an onQueryStarted callback to log the request
