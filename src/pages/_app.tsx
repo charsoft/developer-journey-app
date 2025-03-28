@@ -14,31 +14,38 @@
  * limitations under the License.
  */
 import 'src/styles/globals.css'
-import { SessionProvider } from "next-auth/react";
 import type { AppProps } from 'next/app'
 import { Provider } from 'react-redux'
 import { store } from '../redux/store'
 import Head from 'next/head';
 import Navbar from 'src/components/navbar';
 import { Toaster } from 'react-hot-toast'
+import { useEffect } from 'react';
 
 export default function App({
   Component,
-  pageProps: { session, ...pageProps } }: AppProps) {
+  pageProps }: AppProps) {
+  
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+  }, []);
+
   return (
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <SessionProvider session={session}>
-        <Provider store={store}>
-          <div className="flex flex-col h-screen justify-between">
-            <Navbar />
-            <Component {...pageProps} />
-          </div>
-          <Toaster position="top-center" />
-        </Provider>
-      </SessionProvider>
+      <Provider store={store}>
+        <div className="flex flex-col h-screen justify-between">
+          <Navbar />
+          <Component {...pageProps} />
+        </div>
+        <Toaster position="top-center" />
+      </Provider>
     </>
   );
 };

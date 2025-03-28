@@ -1,10 +1,35 @@
-import React from 'react';
-import { signIn } from 'next-auth/react';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 
 export default function SignIn() {
-  const handleGoogleSignIn = () => {
-    signIn('google', { callbackUrl: '/' });
+  useEffect(() => {
+    if (window.google) {
+      window.google.accounts.id.initialize({
+        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+        callback: handleCredentialResponse,
+      });
+
+      window.google.accounts.id.renderButton(
+        document.getElementById('google-signin-button'),
+        {
+          theme: 'outline',
+          size: 'large',
+        }
+      );
+    }
+  }, []);
+
+  const handleCredentialResponse = async (response: any) => {
+    const token = response.credential;
+    const res = await fetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+
+    const user = await res.json();
+    console.log('Signed in user:', user);
+    // Redirect or save user state here
   };
 
   return (
@@ -30,20 +55,8 @@ export default function SignIn() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <div className="space-y-6">
-            <div>
-              <button
-                onClick={handleGoogleSignIn}
-                className="w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                <Image
-                  src="/google.svg"
-                  alt="Google Logo"
-                  width={20}
-                  height={20}
-                  className="mr-2"
-                />
-                Sign in with Google
-              </button>
+            <div className="flex justify-center">
+              <div id="google-signin-button"></div>
             </div>
 
             <div className="relative">

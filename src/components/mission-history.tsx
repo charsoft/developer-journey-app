@@ -18,8 +18,10 @@ import Image from 'next/image'
 import Link from 'next/link';
 import { missions } from 'src/initialData.ts/missions'
 import { useGetUserQuery } from 'src/redux/apiSlice';
+import { useEffect, useState } from 'react';
 
 export default function MissionHistory() {
+  const [isClient, setIsClient] = useState(false);
   const {
     data: user,
     isLoading,
@@ -27,6 +29,20 @@ export default function MissionHistory() {
     isError,
     error
   } = useGetUserQuery();
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return (
+      <section className="bg-slate-100 text-slate-100 rounded-r-xl p-8 bg-slate-800 my-4 col-span-11 space-y-4">
+        <div className="relative overflow-x-auto">
+          <div>Loading...</div>
+        </div>
+      </section>
+    );
+  }
 
   if (isSuccess || isLoading) {
     return (
