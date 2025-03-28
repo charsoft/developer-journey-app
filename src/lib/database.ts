@@ -69,6 +69,39 @@ export class Database {
     });
   }
 
+  async setUserProfile({
+    username,
+    firstName,
+    lastName,
+    email,
+    phoneNumber,
+    technologyInterest,
+  }: {
+    username: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string;
+    technologyInterest: string;
+  }): Promise<void> {
+    const userProfileRef = this.db.collection('UserProfiles').doc(username);
+    await userProfileRef.set({
+      username,
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      technologyInterest,
+      updatedAt: new Date().toISOString(),
+    }, { merge: true });
+  }
+
+  async getUserProfile(username: string): Promise<any> {
+    const userProfileRef = this.db.collection('UserProfiles').doc(username);
+    const doc = await userProfileRef.get();
+    return doc.exists ? doc.data() : null;
+  }
+
   /**
    * Returns true if able to connect to the Firestore instance.
    * The Firestore API times out a request after 60 seconds. This method
