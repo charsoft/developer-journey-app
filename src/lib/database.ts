@@ -54,7 +54,7 @@ export class Database {
     const userDoc = this.db.collection('users').doc(username);
     const snapshot = await userDoc.get();
     const completedMissions = snapshot.data()?.completedMissions || [];
-
+    console.log("User Info:", username);
     return { username, completedMissions }
   }
 
