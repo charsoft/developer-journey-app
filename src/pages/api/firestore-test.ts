@@ -34,7 +34,7 @@ export default async function handler(
       await db.testConnection();
       console.log("Test user created successfully");
 
-      const user = await db.getUser('diagnostic-test-user');
+      const user = await db.getUser({ username: 'diagnostic-test-user' });
       console.log("Test user retrieved:", user);
       
       res.status(200).json({ 

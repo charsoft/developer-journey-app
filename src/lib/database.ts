@@ -20,7 +20,6 @@ export class Database {
   private db: Firestore;
 
   constructor() {
-    console.log("Initializing Database with NODE_ENV:", process.env.NODE_ENV);
     if (process.env.NODE_ENV === 'development') {
       // use the firestore emulator
       this.db = new Firestore({
@@ -36,103 +35,38 @@ export class Database {
         console.error(errMessage);
         throw new Error(errMessage);
       }
-      console.log("Initializing Firestore with projectId:", projectId);
       this.db = new Firestore({
         projectId: projectId,
       });
     }
   }
 
-  async setUser(userData: User): Promise<User> {
-    try {
-      console.log("Setting user data:", userData);
-      await this.db.collection('users').doc(userData.username).set(userData);
-      console.log("User data set successfully.");
-      return userData;
-    } catch (error) {
-      console.error("Error setting user:", error);
-      throw error;
-    }
+  async setUser({ username, completedMissions }: { username: string, completedMissions?: string[] }): Promise<any> {
+    const userDoc = this.db.collection('users').doc(username);
+
+    return userDoc.set({
+      username,
+      completedMissions: completedMissions || [],
+    }, { merge: true });
   }
 
-  async getUser(username: string): Promise<User> {
-    try {
-      console.log("Getting user data for:", username);
-      const userDoc = await this.db.collection('users').doc(username).get();
-      
-      if (!userDoc.exists) {
-        console.log("User not found, creating new user");
-        const newUser: User = {
-          id: username, // Using username as ID
-          username,
-          completedMissions: [],
-          itemsCollected: [],
-          currentMission: undefined,
-          position: undefined
-        };
-        await this.db.collection('users').doc(username).set(newUser);
-        console.log("Created new user:", newUser);
-        return newUser;
-      }
+  async getUser({ username }: { username: string }): Promise<User> {
+    const userDoc = this.db.collection('users').doc(username);
+    const snapshot = await userDoc.get();
+    const completedMissions = snapshot.data()?.completedMissions || [];
 
-      const userData = userDoc.data() as User;
-      // Ensure the user has an ID
-      if (!userData.id) {
-        console.log("User exists but has no ID, updating with ID");
-        const updatedUser = {
-          ...userData,
-          id: username
-        };
-        await this.db.collection('users').doc(username).set(updatedUser, { merge: true });
-        console.log("Updated user with ID:", updatedUser);
-        return updatedUser;
-      }
-
-      console.log("Retrieved user data:", userData);
-      return userData;
-    } catch (error) {
-      console.error("Error getting user:", error);
-      throw error;
-    }
+    return { username, completedMissions }
   }
 
-  async addCompletedMission(username: string, missionId: string): Promise<User> {
-    try {
-      console.log("Adding completed mission:", { username, missionId });
-      const userRef = this.db.collection('users').doc(username);
-      
-      const result = await this.db.runTransaction(async (transaction) => {
-        const userDoc = await transaction.get(userRef);
-        
-        if (!userDoc.exists) {
-          throw new Error('User not found');
-        }
+  async addCompletedMission({ username, missionId }: { username: string, missionId: string }): Promise<any> {
+    const { completedMissions } = await this.getUser({ username });
+    const updatedMissions = [...completedMissions, missionId]
 
-        const userData = userDoc.data() as User;
-        if (!userData.id) {
-          throw new Error('User has no ID');
-        }
 
-        const updatedCompletedMissions = userData.completedMissions?.length 
-          ? [...userData.completedMissions, missionId]
-          : [missionId];
-        
-        transaction.update(userRef, {
-          completedMissions: updatedCompletedMissions
-        });
-
-        return {
-          ...userData,
-          completedMissions: updatedCompletedMissions
-        };
-      });
-
-      console.log("Successfully added completed mission:", result);
-      return result;
-    } catch (error) {
-      console.error("Error adding completed mission:", error);
-      throw error;
-    }
+    return this.setUser({
+      username,
+      completedMissions: updatedMissions,
+    });
   }
 
   /**
@@ -167,9 +101,11 @@ export class Database {
     }
   }
 
-  // Adding a new method to test connection with detailed logging
-  async testConnection() {
-    console.log("Testing Firestore connection...");
+  /**
+   * Tests the Firestore connection by performing basic read and write operations.
+   * @returns Promise<boolean> - true if connection test succeeds, false otherwise
+   */
+  async testConnection(): Promise<boolean> {
     try {
       // Try a basic Firestore operation
       const testDoc = this.db.collection('_connection_test').doc('test');
