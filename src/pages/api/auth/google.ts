@@ -26,6 +26,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       completedMissions: [],
     });
 
+    // Set a session cookie
+    res.setHeader('Set-Cookie', `session=${token}; Path=/; HttpOnly; SameSite=Lax`);
+
     // Return user data
     res.status(200).json({
       username,

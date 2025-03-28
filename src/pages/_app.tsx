@@ -31,6 +31,15 @@ export default function App({
     script.src = 'https://accounts.google.com/gsi/client';
     script.async = true;
     script.defer = true;
+    
+    script.onload = () => {
+      console.log('Google Identity Services script loaded');
+    };
+    
+    script.onerror = (error) => {
+      console.error('Error loading Google Identity Services script:', error);
+    };
+    
     document.body.appendChild(script);
   }, []);
 

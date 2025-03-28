@@ -13,27 +13,59 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { NextApiRequest, NextApiResponse } from 'next'
-import { Database } from "../../lib/database";
-import { User } from 'src/models/User';
-import { getSession } from 'next-auth/react';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { Database } from 'src/lib/database';
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<User>
-) {
-  const fs = new Database();
-  const session = await getSession({ req });
-  const username = session?.user?.name || '';
-  if (!username) {
-    return res.status(200).send({ username, completedMissions: [] });
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const db = new Database();
+
+  if (req.method === 'GET') {
+    try {
+      // Get username from session cookie
+      const sessionCookie = req.cookies.session;
+      if (!sessionCookie) {
+        return res.status(401).json({ message: 'Not authenticated' });
+      }
+
+      // Verify the session token with Google
+      const ticket = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + sessionCookie);
+      const payload = await ticket.json();
+
+      if (!payload.email) {
+        return res.status(401).json({ message: 'Invalid session' });
+      }
+
+      const username = payload.email.split('@')[0];
+      const user = await db.getUser({ username });
+      res.status(200).json(user);
+    } catch (error) {
+      console.error('Error getting user:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  } else if (req.method === 'POST') {
+    try {
+      const { mission } = req.body;
+      const sessionCookie = req.cookies.session;
+      if (!sessionCookie) {
+        return res.status(401).json({ message: 'Not authenticated' });
+      }
+
+      // Verify the session token with Google
+      const ticket = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + sessionCookie);
+      const payload = await ticket.json();
+
+      if (!payload.email) {
+        return res.status(401).json({ message: 'Invalid session' });
+      }
+
+      const username = payload.email.split('@')[0];
+      await db.addCompletedMission({ username, missionId: mission.id });
+      res.status(200).json({ message: 'Mission completed' });
+    } catch (error) {
+      console.error('Error adding completed mission:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  } else {
+    res.status(405).json({ message: 'Method not allowed' });
   }
-
-  if (req.method === 'POST') {
-    const missionId = req.body.id;
-    await fs.addCompletedMission({ username, missionId })
-  }
-
-  const user = await fs.getUser({ username });
-  res.status(200).json(user)
 }

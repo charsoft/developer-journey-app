@@ -1,12 +1,21 @@
 import React, { useEffect } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 
 export default function SignIn() {
+  const router = useRouter();
+
   useEffect(() => {
+    console.log('Client ID:', process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+    
     if (window.google) {
       window.google.accounts.id.initialize({
         client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
         callback: handleCredentialResponse,
+        auto_select: false,
+        cancel_on_tap_outside: true,
+        context: 'signin',
+        ux_mode: 'popup'
       });
 
       window.google.accounts.id.renderButton(
@@ -20,16 +29,29 @@ export default function SignIn() {
   }, []);
 
   const handleCredentialResponse = async (response: any) => {
+    console.log('Credential response:', response);
     const token = response.credential;
-    const res = await fetch('/api/auth/google', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token }),
-    });
+    
+    try {
+      const res = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
 
-    const user = await res.json();
-    console.log('Signed in user:', user);
-    // Redirect or save user state here
+      if (!res.ok) {
+        throw new Error('Authentication failed');
+      }
+
+      const user = await res.json();
+      console.log('Signed in user:', user);
+      
+      // Redirect to home page after successful sign-in
+      router.push('/');
+    } catch (error) {
+      console.error('Error during sign-in:', error);
+      // Handle error (you might want to show an error message to the user)
+    }
   };
 
   return (
