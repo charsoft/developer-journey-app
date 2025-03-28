@@ -42,9 +42,9 @@ export default async function handler(
     console.error("No username provided");
     return res.status(400).json({ 
       id: '',
-      username: '',
-      completedMissions: [],
-      itemsCollected: [],
+      // username: '',
+      // completedMissions: [],
+      // itemsCollected: [],
       error: 'Username is required' 
     } as User & { error: string });
   }

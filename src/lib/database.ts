@@ -113,7 +113,9 @@ export class Database {
           throw new Error('User has no ID');
         }
 
-        const updatedCompletedMissions = [...userData.completedMissions, missionId];
+        const updatedCompletedMissions = userData.completedMissions?.length 
+          ? [...userData.completedMissions, missionId]
+          : [missionId];
         
         transaction.update(userRef, {
           completedMissions: updatedCompletedMissions
