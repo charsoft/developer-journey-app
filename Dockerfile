@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# syntax = docker/dockerfile:1.2
+# syntax = docker/dockerfile:1.2  
 
 #######################################
 FROM node:18-slim AS builder
