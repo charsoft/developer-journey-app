@@ -26,6 +26,11 @@ COPY package.json \
 RUN npm ci
 COPY . .
 
+#add the clien id environment variable because it is not injected at runtime
+# Add this before your build step
+ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
+ENV NEXT_PUBLIC_GOOGLE_CLIENT_ID=$NEXT_PUBLIC_GOOGLE_CLIENT_ID
+
 # Disable telemetry before building: https://nextjs.org/telemetry
 ENV NEXT_TELEMETRY_DISABLED 1
 RUN npm run build
@@ -37,6 +42,10 @@ FROM node:18-slim AS runner
 WORKDIR /app
 RUN adduser --system --uid 1001 nextjs
 RUN addgroup --system --gid 1001 nodejs
+
+# ✅ Repeat the ARG and ENV declarations (important!)
+ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
+ENV NEXT_PUBLIC_GOOGLE_CLIENT_ID=$NEXT_PUBLIC_GOOGLE_CLIENT_ID
 
 # Only necessary files to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
