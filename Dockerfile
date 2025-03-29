@@ -38,7 +38,7 @@ RUN npm run build
 #######################################
 FROM node:18-slim AS runner
 #######################################
-
+ 
 WORKDIR /app
 RUN adduser --system --uid 1001 nextjs
 RUN addgroup --system --gid 1001 nodejs
