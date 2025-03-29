@@ -25,6 +25,10 @@ steps:
       - --allow-unauthenticated
       - --tag=latest
       - --service-account=${_RUN_SERVICE_ACCOUNT}
-      - --update-env-vars=PROJECT_ID=${PROJECT_ID}
+      - --update-env-vars=PROJECT_ID=${PROJECT_ID},NEXT_PUBLIC_GOOGLE_CLIENT_ID=${_NEXT_PUBLIC_GOOGLE_CLIENT_ID}
+
+substitutions:
+  _NEXT_PUBLIC_GOOGLE_CLIENT_ID: "610793990330-1p3jlr04pajshcnfnsi1nah254kejtpj.apps.googleusercontent.com"
+
 options:
   logging: CLOUD_LOGGING_ONLY
