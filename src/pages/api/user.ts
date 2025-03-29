@@ -14,58 +14,70 @@
  * limitations under the License.
  */
 import { NextApiRequest, NextApiResponse } from 'next';
+import { OAuth2Client } from 'google-auth-library';
 import { Database } from 'src/lib/database';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const db = new Database();
-
-  if (req.method === 'GET') {
-    try {
-      // Get username from session cookie
-      const sessionCookie = req.cookies.session;
-      if (!sessionCookie) {
-        return res.status(401).json({ message: 'Not authenticated' });
-      }
-
-      // Verify the session token with Google
-      const ticket = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + sessionCookie);
-      const payload = await ticket.json();
-
-      if (!payload.email) {
-        return res.status(401).json({ message: 'Invalid session' });
-      }
-
-      const username = payload.email.split('@')[0];
-      const user = await db.getUser({ username });
-      res.status(200).json(user);
-    } catch (error) {
-      console.error('Error getting user:', error);
-      res.status(500).json({ message: 'Internal server error' });
+  try {
+    // Get the session cookie from the request
+    const sessionCookie = req.cookies.session;
+    if (!sessionCookie) {
+      return res.status(401).json({ message: 'Not authenticated' });
     }
-  } else if (req.method === 'POST') {
+
+    // Verify the session cookie with Google
+    const client = new OAuth2Client(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+    let payload;
+    
     try {
-      const { mission } = req.body;
-      const sessionCookie = req.cookies.session;
-      if (!sessionCookie) {
-        return res.status(401).json({ message: 'Not authenticated' });
-      }
-
-      // Verify the session token with Google
-      const ticket = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + sessionCookie);
-      const payload = await ticket.json();
-
-      if (!payload.email) {
-        return res.status(401).json({ message: 'Invalid session' });
-      }
-
-      const username = payload.email.split('@')[0];
-      await db.addCompletedMission({ username, missionId: mission.id });
-      res.status(200).json({ message: 'Mission completed' });
+      const ticket = await client.verifyIdToken({
+        idToken: sessionCookie,
+        audience: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+      });
+      payload = ticket.getPayload();
     } catch (error) {
-      console.error('Error adding completed mission:', error);
-      res.status(500).json({ message: 'Internal server error' });
+      console.error('Error verifying session:', error);
+      return res.status(401).json({ message: 'Invalid session' });
     }
-  } else {
-    res.status(405).json({ message: 'Method not allowed' });
+
+    // Extract email from payload
+    const email = payload?.email;
+    if (!email) {
+      return res.status(401).json({ message: 'Invalid user data' });
+    }
+
+    // Get username from email (everything before @)
+    const username = email.split('@')[0];
+
+    // Create a Database instance
+    const db = new Database();
+
+    if (req.method === 'GET') {
+      try {
+        const user = await db.getUser({ username });
+        return res.status(200).json(user);
+      } catch (error) {
+        console.error('Error getting user:', error);
+        return res.status(500).json({ message: 'Failed to get user' });
+      }
+    } else if (req.method === 'POST') {
+      try {
+        // Update user data
+        const { completedMissions } = req.body;
+        await db.setUser({ username, completedMissions });
+        
+        // Return updated user data
+        const updatedUser = await db.getUser({ username });
+        return res.status(200).json(updatedUser);
+      } catch (error) {
+        console.error('Error updating user:', error);
+        return res.status(500).json({ message: 'Failed to update user' });
+      }
+    } else {
+      return res.status(405).json({ message: 'Method not allowed' });
+    }
+  } catch (error) {
+    console.error('Error in user API:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 }
