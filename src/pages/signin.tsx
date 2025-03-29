@@ -6,17 +6,19 @@ export default function SignIn() {
   const router = useRouter();
 
   useEffect(() => {
-    console.log('Client ID:', process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+    useEffect(() => {
+      fetch('/api/config')
+        .then((res) => res.json())
+        .then((data) => {
     
-    if (window.google) {
+    if (window.google  && data.clientId) {
+      console.log("Client ID from runtime API:", data.clientId);
+
       window.google.accounts.id.initialize({
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+        client_id: data.clientId,
         callback: handleCredentialResponse,
-        auto_select: false,
-        cancel_on_tap_outside: true,
-        context: 'signin',
-        ux_mode: 'popup'
       });
+
 
       window.google.accounts.id.renderButton(
         document.getElementById('google-signin-button'),
@@ -26,10 +28,10 @@ export default function SignIn() {
         }
       );
     }
-  }, []);
+  });
 
   const handleCredentialResponse = async (response: any) => {
-    console.log('Credential response:', response);
+    console.log("JWT ID Token:", response.credential);
     const token = response.credential;
     
     try {
