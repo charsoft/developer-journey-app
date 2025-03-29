@@ -6,29 +6,27 @@ export default function SignIn() {
   const router = useRouter();
 
   useEffect(() => {
-    useEffect(() => {
-      fetch('/api/config')
-        .then((res) => res.json())
-        .then((data) => {
-    
-    if (window.google  && data.clientId) {
-      console.log("Client ID from runtime API:", data.clientId);
+    fetch('/api/config')
+      .then((res) => res.json())
+      .then((data) => {
+        if (window.google && data.clientId) {
+          console.log("Client ID from runtime API:", data.clientId);
 
-      window.google.accounts.id.initialize({
-        client_id: data.clientId,
-        callback: handleCredentialResponse,
-      });
+          window.google.accounts.id.initialize({
+            client_id: data.clientId,
+            callback: handleCredentialResponse,
+          });
 
-
-      window.google.accounts.id.renderButton(
-        document.getElementById('google-signin-button'),
-        {
-          theme: 'outline',
-          size: 'large',
+          window.google.accounts.id.renderButton(
+            document.getElementById('google-signin-button'),
+            {
+              theme: 'outline',
+              size: 'large',
+            }
+          );
         }
-      );
-    }
-  });
+      });
+  }, []);
 
   const handleCredentialResponse = async (response: any) => {
     console.log("JWT ID Token:", response.credential);
@@ -111,4 +109,4 @@ export default function SignIn() {
       </div>
     </div>
   );
-} 
+}
