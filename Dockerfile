@@ -18,7 +18,7 @@
 FROM node:18-slim AS builder
 #######################################
 
-WORKDIR /app
+WORKDIR /app 
 COPY package.json \
      package-lock.json* \
      ./
