@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import { LearningResource } from "./LearningResource";
-
+  
 export class Mission {
   id!: string;
   title!: string;
