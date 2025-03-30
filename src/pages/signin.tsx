@@ -15,13 +15,16 @@ export default function SignIn() {
           window.google.accounts.id.initialize({
             client_id: data.clientId,
             callback: handleCredentialResponse,
+            auto_select: false,
+            cancel_on_tap_outside: true,
+            context: 'signin'
           });
 
           window.google.accounts.id.renderButton(
             document.getElementById('google-signin-button'),  
             {
               theme: 'outline',
-              size: 'large',
+              size: 'large'
             }
           );
         }
