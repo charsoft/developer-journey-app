@@ -14,6 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Verify the token with Google
     console.log('Verifying token with Google...');
     const client = new OAuth2Client(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+    console.log('Client ID used for verification:', process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
     
     try {
       const ticket = await client.verifyIdToken({
