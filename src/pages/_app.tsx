@@ -20,13 +20,13 @@ import { store } from '../redux/store'
 import Head from 'next/head';
 import Navbar from 'src/components/navbar';
 import { Toaster } from 'react-hot-toast'
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 
 export default function App({
   Component,
   pageProps }: AppProps) {
   
-  useEffect(() => {
+  const loadGoogleScript = useCallback(() => {
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
     script.async = true;
@@ -41,17 +41,28 @@ export default function App({
     };
     
     document.body.appendChild(script);
+    return script;
   }, []);
+
+  useEffect(() => {
+    const script = loadGoogleScript();
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, [loadGoogleScript]);
 
   return (
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content="Charsoft - Professional Software Development Services" />
       </Head>
       <Provider store={store}>
-        <div className="flex flex-col h-screen justify-between">
+        <div className="flex flex-col min-h-screen">
           <Navbar />
-          <Component {...pageProps} />
+          <main className="flex-grow">
+            <Component {...pageProps} />
+          </main>
         </div>
         <Toaster position="top-center" />
       </Provider>
