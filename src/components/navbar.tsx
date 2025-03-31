@@ -27,9 +27,11 @@ export default function Navbar() {
   const router = useRouter()
 
   const navigation = [
-    { name: 'Current Mission', href: '/' },
-    { name: 'Completed Missions', href: '/mission-history' },
-    { name: 'User Profile', href: '/userProfile' },
+    { name: 'Home', href: '/' },
+    { name: 'About', href: '/charsoft/about' },
+    { name: 'Services', href: '/charsoft/services' },
+    { name: 'Portfolio', href: '/charsoft/portfolio' },
+    { name: 'Contact', href: '/charsoft/contact' },
   ].map((route: any) => ({
     ...route,
     current: router.pathname === route.href,
@@ -54,13 +56,15 @@ export default function Navbar() {
               </div>
               <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                 <div className="flex flex-shrink-0 items-center">
-                  <Image
-                    src='/Google_Cloud_logo.svg'
-                    alt='Google Cloud Logo'
-                    width='80'
-                    height='80'
-                    className='block h-8 w-auto'
-                  />
+                  <Link href="/">
+                    <Image
+                      src='/charsoft-logo.svg'
+                      alt='Charsoft Logo'
+                      width='120'
+                      height='40'
+                      className='block h-8 w-auto'
+                    />
+                  </Link>
                 </div>
                 <div className="hidden sm:ml-6 sm:block">
                   <div className="flex space-x-4">
