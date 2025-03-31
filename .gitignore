@@ -37,7 +37,7 @@ next-env.d.ts
 
 # service account
 service-account.json
-
+gemini-svc-acct-credentials.json
 # Local .terraform directories
 **/.terraform/*
 
