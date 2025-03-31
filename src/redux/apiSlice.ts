@@ -18,7 +18,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { Mission } from 'src/models/Mission'
 import { User } from 'src/models/User'
-import { startMission } from './gameSlice';
 
 // Define our single API slice object
 export const apiSlice = createApi({
@@ -26,25 +25,22 @@ export const apiSlice = createApi({
   reducerPath: 'api',
   // All of our requests will have URLs starting with '/api'
   baseQuery: fetchBaseQuery({ baseUrl: '/api' }),
-  tagTypes: ['User'],
+  tagTypes: ['User', 'Mission'],
   // The "endpoints" represent operations and requests for this server
   endpoints: builder => ({
     // The `getUser` endpoint is a "query" operation that returns data
     getUser: builder.query<User, void>({
       // The URL for the request is '/api/user', this is a GET request
-      query: () => '/user',
-      onCacheEntryAdded: (_, { dispatch }) => { 
-        dispatch(startMission())
-      },
+      query: () => 'user',
       providesTags: ['User'],
     }),
-    addCompletedMission: builder.mutation({
+    addCompletedMission: builder.mutation<void, { mission: Mission }>({
       // The URL for the request is '/api/user', this is a POST request
-      query: ({mission}: {mission: Mission}) => ({
-        url: '/user',
+      query: ({ mission }) => ({
+        url: 'user/completed-missions',
         method: 'POST',
         // Include the entire post object as the body of the request
-        body: mission,
+        body: { mission },
       }),
       invalidatesTags: ['User'],
       // Add an onQueryStarted callback to log the request

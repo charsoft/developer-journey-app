@@ -6,3 +6,12 @@
 .next/
 node_modules/
 *~
+.DS_Store
+*.log
+coverage/
+.idea/
+.vscode/
+*.md
+!README.md
+tests/
+scripts/

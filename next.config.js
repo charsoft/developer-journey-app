@@ -22,9 +22,6 @@ const nextConfig = {
     dirs: ['pages', 'components', 'lib', 'src', 'models', 'redux'],
   },
   images: {
-    domains: ['lh3.googleusercontent.com']
-  },
-  images: {
     remotePatterns: [
       {
         protocol: 'https',

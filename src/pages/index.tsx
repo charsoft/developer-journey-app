@@ -17,10 +17,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useGetUserQuery } from 'src/redux/apiSlice';
 import Head from "next/head";
-import PromptPanel from "../components/prompt-panel";
-import TileBoard from "../components/tile-board";
-import GameControls from "../components/game-controls";
-import Inventory from "../components/inventory";
 import SignInRecommendation from "src/components/sign-in-recommendation";
 
 export default function Home() {
@@ -63,11 +59,13 @@ export default function Home() {
             </div>
           ) : (
             <div className="mt-10">
-              <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
-                <PromptPanel />
-                <TileBoard />
-                <GameControls />
-                <Inventory />
+              <div className="grid grid-cols-1 gap-6">
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome Back!</h2>
+                  <p className="text-gray-600 mb-4">
+                    Continue your learning journey and explore new technologies.
+                  </p>
+                </div>
               </div>
             </div>
           )}

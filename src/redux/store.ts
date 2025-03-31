@@ -15,12 +15,10 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit'
-import gameReducer from './gameSlice'
 import { apiSlice } from 'src/redux/apiSlice';
 
 export const store = configureStore({
   reducer: {
-    game: gameReducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
   },
   middleware: getDefaultMiddleware =>

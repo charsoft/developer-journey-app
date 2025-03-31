@@ -19,16 +19,21 @@ FROM node:18-slim AS builder
 #######################################
 
 WORKDIR /app 
-COPY package.json \
-     package-lock.json* \
-     ./
-     
-RUN npm ci
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies with clean npm cache
+RUN npm cache clean --force && \
+    npm install
+
+# Copy source files
 COPY . .
 
-
-# Disable telemetry before building: https://nextjs.org/telemetry
+# Disable telemetry before building
 ENV NEXT_TELEMETRY_DISABLED 1
+
+# Build the application
 RUN npm run build
 
 #######################################
@@ -36,19 +41,25 @@ FROM node:18-slim AS runner
 #######################################
  
 WORKDIR /app
+
+# Create non-root user
 RUN adduser --system --uid 1001 nextjs
 RUN addgroup --system --gid 1001 nodejs
 
-
-
-# Only necessary files to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-# [next.config.js] nextConfig must have `property: output: "standalone"`
+# Copy necessary files
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
-USER nextjs
+# Set environment variables
 ENV NODE_ENV production
+ENV PORT 8080
 
+# Switch to non-root user
+USER nextjs
+
+# Expose the port
+EXPOSE 8080
+
+# Start the application
 CMD ["node", "server.js"]
